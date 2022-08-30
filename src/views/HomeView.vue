@@ -1,6 +1,6 @@
 <template>
   <div class="login-container" v-if="!isAuthenticated">
-    <AppLogin loginHeader="Welcome Back!"/>
+    <AppLogin/>
   </div>
 </template>
 

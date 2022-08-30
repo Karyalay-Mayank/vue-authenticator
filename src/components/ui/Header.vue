@@ -31,11 +31,7 @@
 		  logout () {
 		    this.$store.dispatch('logout')
 		      .then(() => {
-		      	console.log('Sign Out')
-		        this.$router.push('/')
-		    }).catch((err) => {
-		    	console.log(err)
-		    })
+		    }).catch((err) => {})
 		  }
 		}
 	};

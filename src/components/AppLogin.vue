@@ -3,10 +3,10 @@
 	<div class="form-container">
 		<form @submit.prevent="submit">
 			<div class="input-div">
-				<InputField type="text" v-model="userID" placeholder="User name" labelText="Username" inputBox="inputBox" />
+				<InputField type="text" v-model="userID" placeholder="User name" labelText="Username" inputBox="inputBox" labelClass="labelClass" required />
 			</div>
 			<div class="input-div">
-				<InputField type="password" v-model="password" placeholder="Password" labelText="Password" inputBox="inputBox" />
+				<InputField type="password" v-model="password" placeholder="Password" labelText="Password" inputBox="inputBox" labelClass="labelClass" required />
 			</div>
 			
 			<ButtonField type="submit" btnText="Submit" buttonContainer="buttonContainer" btnPrimary="btnPrimary" :disabled="isFormEmpty" />
@@ -23,13 +23,6 @@
 	export default {
 		name: "AppLogin",
 		components: { LoginHeader, InputField, ButtonField },
-		props:{
-		  loginHeader:{
-		    type: String,
-		    required: true,
-		    default: null
-		  }
-		},
 		data() {
 			return {
 				userID: '',
@@ -46,18 +39,13 @@
 		},
 
 		methods: {
-
 			submit(){
 				let data = {
-					userID: this.userID,
-					password: this.password
+					mrn: this.userID,
+					code: this.password
 				};
-				console.log("Data Value", data)
 				this.$store.dispatch('login', data).then(() => {
-					this.$router.push('/dashboard');
-				}).catch((err) => {
-					console.log(err)
-				})
+				}).catch((err) => {})
 			}	
 		}
 	};
@@ -79,8 +67,6 @@
 	}
 
 	.input-div{
-		display: flex;
-		flex-direction: column;
 		margin: 2rem 0rem;
 		padding: 0rem 1.5rem;
 	}
@@ -90,6 +76,12 @@
 		border-radius:  5px;
 		padding: 10px 15px;
 		font-size: 16px;
+	}
+
+	.input-div>div /deep/ .labelClass {
+		display:  block;
+		width: 69%;
+		margin-bottom: 0.5rem;
 	}
 
 	.buttonContainer {

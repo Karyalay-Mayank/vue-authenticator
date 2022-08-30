@@ -1,6 +1,6 @@
 <template>
 	<div>
-		<label>{{labelText}}</label>
+		<label :class="labelClass">{{labelText}}</label>
 		<input
 			:class="inputBox"
 			:value="modelValue"
@@ -17,6 +17,10 @@
 		name: "InputField",
 
 		props: {
+			labelClass: {
+				type: String,
+				required: false
+			},
 			labelText: {
 				type: String,
 				required: false

@@ -1,13 +1,14 @@
 /* eslint-disable */
 import { createStore } from 'vuex'
 import { axiosBase } from '../api/axios.js'
+import router from '../router'
 
 export default createStore({
   state: {
-    access: '',
-    refresh: '',
+    access: localStorage.getItem('access') || '',
+    refresh: localStorage.getItem('refresh') || '',
     isAuthenticated: localStorage.getItem("access") ? true : false,
-    user: {}
+    user: JSON.parse(localStorage.getItem("user")) || {}
   },
   getters: {
     isAuthenticated: (state) => {
@@ -19,33 +20,31 @@ export default createStore({
   },
   mutations: {
     authenticateUser(state, payload) {
-      state.user = payload;
-      localStorage.setItem('user', payload.user.data);
-      state.access = payload;
-      localStorage.setItem('access', payload.access);
-      state.refresh = payload;
-      localStorage.setItem('refresh', payload.refresh);
+      state.user = payload.data.user.data;
+      localStorage.setItem('user', JSON.stringify(payload.data.user.data));
+      state.access = payload.data.access;
+      localStorage.setItem('access', payload.data.access);
+      state.refresh = payload.data.refresh;
+      localStorage.setItem('refresh', payload.data.refresh);
+      state.isAuthenticated = true;
     },
     updateAccess(state, access) {
       state.access = access;
     },
     destroyToken (state) {
-      state.access = null;
-      state.refresh = null;
+      state.access = '';
+      state.refresh = '';
+      state.user = {};
+      state.isAuthenticated = false;
     }
   },
   actions: {
-    // login({commit}, user) {
-    //   commit('authenticateUser', user)
-    //   console.log(user)
-    // }
     login (context, data) {
       return new Promise((resolve, reject) => {
-        // send the username and password to the backend API:
         axiosBase.post('/auth/verify-otp/', data)
-        // if successful update local storage:
           .then(response => {
-            context.commit('authenticateUser', response) // store the access and refresh token in localstorage
+            context.commit('authenticateUser', response)
+            router.push('/dashboard');
             resolve()
           })
           .catch(err => {
@@ -53,37 +52,36 @@ export default createStore({
           })
       })
     },
-    logout (context, data) {
-      if (context.getters.isAuthenticated) {
-        return new Promise((resolve, reject) => {
-          axiosBase.post('/auth/logout/')
-            .then(response => {
-              localStorage.removeItem('access')
-              localStorage.removeItem('refresh')
-              context.commit('destroyToken')
-            })
-            .catch(err => {
-              localStorage.removeItem('access')
-              localStorage.removeItem('refresh')
-              context.commit('destroyToken')
-              resolve(err)
-            })
-        })
+    logout ({ commit, state }) {
+      var data = {
+            'refresh': state.refresh
       }
+      return new Promise((resolve, reject) => {
+        axiosBase.post('/auth/logout/', data)
+          .then(response => {
+          })
+          .catch(err => {
+            resolve(err)
+          }).finally(() => {
+            localStorage.clear()
+            commit('destroyToken')
+            router.push('/')
+          })
+      })
     },
     refreshToken (context) {
-      let refreshToken = { 'refresh': sessionStorage.getItem('refresh') }
+      let refreshToken = { 'refresh': localStorage.getItem('refresh') }
       return new Promise((resolve, reject) => {
-        axiosBase.post('/auth/refresh-token/', refreshToken) // send the stored refresh token to the backend API
-          .then(response => { // if API sends back new access and refresh token update the store
-            console.log('New access token generated')
+        axiosBase.post('/auth/refresh-token/', refreshToken) 
+          .then(response => { 
             context.commit('updateAccess', response.data.access)
             resolve(response.data.access)
           })
           .catch(err => {
-            console.log('error in refreshToken Task')
             localStorage.clear();
-            reject(err) // error generating new access and refresh token because refresh token has expired
+            router.push('/')
+            commit('destroyToken')
+            reject(err) 
           })
       })
     }, 

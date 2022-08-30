@@ -1,7 +1,7 @@
 <template>
-	<div>
-		<AuthenticatedHeader v-if="isAuthenticated" headerText="Vue Authenticator" headerTextClass="header" />
-		<h1>Welcome, {{this.$store.state.user.name}}</h1>
+	<div v-if="isAuthenticated">
+		<AuthenticatedHeader headerText="Vue Authenticator" headerTextClass="header" />
+		<h1>Welcome, {{user.first_name}} {{user.last_name}}</h1>
 	</div>
 </template>
 

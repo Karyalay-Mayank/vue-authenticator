@@ -7,32 +7,18 @@ const axiosBase = axios.create({
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
-    'Authorization': `Bearer ${sessionStorage.getItem('access')}`
+    'Authorization': `Bearer ${localStorage.getItem('access')}`
   }
 })
 const getAPI = axios.create({
   baseURL: API_BASE_URL
 })
 getAPI.interceptors.response.use(undefined, function (err) {
+  let refresh = localStorage.getItem('refresh')
   if (err.config && err.response && err.response.status === 401) {
-    store.dispatch('refreshToken') 
-      .then(access => {
-        axios.request({
-          baseURL: API_BASE_URL,
-          method: 'get',
-          headers: { 
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'Authorization': `Bearer ${access}`
-          },
-          url: '/mods/'
-        }).then(response => {
-          console.log('Success getting the Mods')
-          store.state.APIData = response.data
-        }).catch(err => {
-          console.log('Got the new access token but error while trying to fetch data from the API using it')
-          return Promise.reject(err)
-        })
+    store.dispatch('refreshToken', refresh) 
+      .then(() => {
+        console.log("Token Refreshed")
       })
       .catch(err => {
         return Promise.reject(err)
